@@ -1,0 +1,187 @@
+/* ================================================================
+   PMReason 博客主题配色方案
+   
+   全局背景：#FFE5CC（浅暖橙）
+   文字颜色：#3D3B36（深岩灰）
+   
+   ★ 当前激活：方案一「深青绿」
+   切换方式：替换下方 --accent 系列变量的色值即可
+   ================================================================ */
+
+:root {
+    /* ── 全局 ── */
+    --theme: #FFE5CC;
+    --entry: #FFDDB3;
+    --border: #E8CCAA;
+    --tertiary: #D4B896;
+
+    /* ── 文字 ── */
+    --primary: #3D3B36;
+    --secondary: #6B655A;
+    --content: #3D3B36;
+
+    /* ── 代码块 ── */
+    --code-bg: #F5E6D0;
+    --code-block-bg: #2D2D2D;
+    --code-block-text: #E6E6E6;
+
+    /* ── 其他 ── */
+    --radius: 8px;
+    --header-height: 60px;
+
+    /* ═══════════════════════════════════════════
+       ★★★ 修改 --accent 系列切换配色 ★★★
+       ═══════════════════════════════════════════ */
+
+    /* ★ 方案三：森林绿 #3A8C3F（当前激活） ★ */
+    --accent: #3A8C3F;
+    --accent-hover: #2E7432;
+    --accent-light: rgba(58, 140, 63, 0.12);
+    --link-color: #3A8C3F;
+    --link-underline: rgba(58, 140, 63, 0.3);
+    --tag-bg: rgba(58, 140, 63, 0.15);
+    --tag-color: #2A6630;
+    --button-bg: #3A8C3F;
+    --button-text: #FFFFFF;
+    --selection-bg: rgba(58, 140, 63, 0.25);
+}
+
+/*
+   ── 其他配色方案（取消注释下面的 --accent 段并注释上面的即可切换） ──
+
+   ★ 方案二：靛蓝紫 #5B4FCF
+   --accent: #5B4FCF;
+   --accent-hover: #4A3FB8;
+   --accent-light: rgba(91, 79, 207, 0.12);
+   --link-color: #5B4FCF;
+   --link-underline: rgba(91, 79, 207, 0.3);
+   --tag-bg: rgba(91, 79, 207, 0.15);
+   --tag-color: #3D3498;
+   --button-bg: #5B4FCF;
+   --button-text: #FFFFFF;
+   --selection-bg: rgba(91, 79, 207, 0.25);
+
+   ★ 方案三：森林绿 #3A8C3F
+   --accent: #3A8C3F;
+   --accent-hover: #2E7432;
+   --accent-light: rgba(58, 140, 63, 0.12);
+   --link-color: #3A8C3F;
+   --link-underline: rgba(58, 140, 63, 0.3);
+   --tag-bg: rgba(58, 140, 63, 0.15);
+   --tag-color: #2A6630;
+   --button-bg: #3A8C3F;
+   --button-text: #FFFFFF;
+   --selection-bg: rgba(58, 140, 63, 0.25);
+*/
+
+/* ── 基础样式 ── */
+body {
+    background: var(--theme);
+    color: var(--content);
+}
+
+/* 链接 */
+a, .entry-link .entry-title {
+    color: var(--link-color);
+    transition: color 0.2s;
+}
+a:hover {
+    color: var(--accent-hover);
+}
+
+/* 文章卡片 */
+.post-entry {
+    background: var(--entry);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: box-shadow 0.2s, transform 0.15s;
+}
+.post-entry:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+/* 标签 */
+.tag a, .post-tags a {
+    background: var(--tag-bg);
+    color: var(--tag-color);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 0.85em;
+    transition: background 0.2s, color 0.2s;
+}
+.tag a:hover, .post-tags a:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* 选中文字 */
+::selection {
+    background: var(--selection-bg);
+    color: var(--primary);
+}
+
+/* 导航栏 + 页脚 */
+.nav {
+    background: var(--entry);
+    border-bottom: 1px solid var(--border);
+}
+.footer {
+    background: var(--entry);
+    border-top: 1px solid var(--border);
+}
+
+/* 代码 */
+code:not([class*="language-"]) {
+    background: var(--code-bg);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+pre {
+    background: var(--code-block-bg);
+    color: var(--code-block-text);
+    border-radius: var(--radius);
+}
+
+/* 元信息 */
+.post-meta { color: var(--secondary); }
+
+/* 目录 */
+.toc {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-light);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 12px 16px;
+}
+.toc a { color: var(--secondary); }
+.toc a:hover { color: var(--accent); }
+
+/* 分页 */
+.pagination a {
+    color: var(--link-color);
+    border: 1px solid var(--border);
+}
+.pagination a:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+/* 暗色模式 */
+[data-theme="dark"] {
+    --theme: #1A1A2E;
+    --entry: #16213E;
+    --border: #2A2A4A;
+    --tertiary: #3A3A5A;
+    --primary: #E0E0E0;
+    --secondary: #A0A0B0;
+    --content: #CCCCCC;
+    --code-bg: #2A2A3E;
+    --code-block-bg: #0F0F23;
+    --code-block-text: #CCCCDD;
+    --tag-bg: var(--accent-light);
+    --tag-color: var(--accent);
+}
+[data-theme="dark"] body { background: var(--theme); color: var(--content); }
+[data-theme="dark"] .post-entry { background: var(--entry); border-color: var(--border); }
