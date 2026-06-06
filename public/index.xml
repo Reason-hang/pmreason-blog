@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>PMReason</title>
+    <link>https://pmreason.top/</link>
+    <description>Recent content on PMReason</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sat, 06 Jun 2026 05:19:44 +0800</lastBuildDate>
+    <atom:link href="https://pmreason.top/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>PMReason 博客上线</title>
+      <link>https://pmreason.top/posts/2026-06-06-pmreason-%E5%8D%9A%E5%AE%A2%E4%B8%8A%E7%BA%BF/</link>
+      <pubDate>Sat, 06 Jun 2026 05:19:44 +0800</pubDate>
+      <guid>https://pmreason.top/posts/2026-06-06-pmreason-%E5%8D%9A%E5%AE%A2%E4%B8%8A%E7%BA%BF/</guid>
+      <description>&lt;h2 id=&#34;欢迎&#34;&gt;欢迎&lt;/h2&gt;
+&lt;p&gt;这是我的技术博客。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Hugo + PaperMod&lt;/li&gt;
+&lt;li&gt;Vditor 编辑器&lt;/li&gt;
+&lt;li&gt;Cloudflare CDN&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    <item>
+      <title>Hello World</title>
+      <link>https://pmreason.top/posts/hello-world/</link>
+      <pubDate>Sat, 06 Jun 2026 05:17:00 +0800</pubDate>
+      <guid>https://pmreason.top/posts/hello-world/</guid>
+      <description>&lt;h2 id=&#34;欢迎来到-pmreason&#34;&gt;欢迎来到 PMReason&lt;/h2&gt;
+&lt;p&gt;这是我的第一篇博客。这里会记录技术学习与思考。&lt;/p&gt;
+&lt;h3 id=&#34;支持-markdown&#34;&gt;支持 Markdown&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;粗体&lt;/strong&gt;、&lt;em&gt;斜体&lt;/em&gt;、&lt;del&gt;删除线&lt;/del&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;代码块&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;列表、表格、引用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;知行合一&lt;/p&gt;&lt;/blockquote&gt;</description>
+    </item>
+  </channel>
+</rss>
