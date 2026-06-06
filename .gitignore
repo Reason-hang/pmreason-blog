@@ -1,0 +1,17 @@
+# Hugo generated files
+/public/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor temp files
+*.swp
+*.swo
+*~
+
+# Logs
+/home/hermes/logs/
+
+# Hugo lock
+.hugo_build.lock
