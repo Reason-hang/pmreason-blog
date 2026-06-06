@@ -1,0 +1,36 @@
+name: Deploy Blog
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.147.0"
+          extended: true
+
+      - name: Build
+        run: hugo --minify
+
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
+          ARGS: "-avz --delete"
+          SOURCE: "public/"
+          REMOTE_HOST: ${{ secrets.HOST }}
+          REMOTE_USER: hermes
+          TARGET: "/home/hermes/blog/public/"
+          EXCLUDE: ""
