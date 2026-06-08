@@ -3,7 +3,7 @@
         <div class="logo">
             {{- $label_text := "PMReason" }}
             <a href="{{ "" | absLangURL }}" accesskey="h" title="PMReason (Alt + H)">
-                <span style="color:#3A8C3F;">PM</span><span style="color:#5B4FCF;">Reason</span>
+                <span style="color:#3A8C3F;letter-spacing:0;">PM</span><span style="color:#5B4FCF;letter-spacing:0;">Reason</span>
             </a>
 
             {{- $lsenabled := (or (not site.Params.disableThemeToggle) (and (not site.Params.disableLangToggle) (hugo.IsMultilingual))) }}
