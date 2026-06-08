@@ -14,13 +14,17 @@
     font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace !important;
   }
 
-  /* Logo "Reason" 靛蓝紫 #5B4FCF */
+  /* Logo 加粗 */
   .logo a {
-    color: #5B4FCF !important;
     font-weight: 700;
   }
-  .logo a:hover {
-    color: #4A3FB5 !important;
+
+  /* 全站禁用 hover 颜色变化 */
+  a:hover, a:hover span, .logo a:hover, .menu a:hover, .menu a:hover span,
+  .nav-avatar-container a:hover, .nav-avatar-container a:hover span,
+  .nav-avatar-img:hover, .entry-link:hover, .post-entry:hover h2 {
+    color: inherit !important;
+    border-color: inherit !important;
   }
 
   /* 导航栏头像样式 */
@@ -36,18 +40,12 @@
     color: var(--primary);
     font-size: 0.9rem;
   }
-  .nav-avatar-container a:hover {
-    color: #5B4FCF;
-  }
   .nav-avatar-img {
     width: 30px;
     height: 30px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid rgba(91, 79, 207, 0.3);
-  }
-  .nav-avatar-img:hover {
-    border-color: #5B4FCF;
   }
 </style>
 
