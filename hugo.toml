@@ -55,6 +55,4 @@ theme = "PaperMod"
   tocopen = false
   socialIcons = [{name = "github", url = "https://github.com"}]
 
-[params.homeInfoParams]
-  Title = "PMReason"
-  Content = "技术博客 - 记录学习与思考"
+# [params.homeInfoParams] — removed per user request

@@ -1,3 +1,56 @@
+<!-- Noto Sans SC (思源黑体) via Google Fonts CDN -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  /* 全局字体替换为思源黑体 */
+  body, h1, h2, h3, h4, h5, h6, p, a, span, li, div, input, textarea, button, code, pre, .logo a, .menu a, .entry-content, .post-content, .md-content {
+    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  }
+  
+  /* 代码块保留等宽字体 */
+  code, pre code, .highlight code {
+    font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace !important;
+  }
+
+  /* Logo "Reason" 靛蓝紫 #5B4FCF */
+  .logo a {
+    color: #5B4FCF !important;
+    font-weight: 700;
+  }
+  .logo a:hover {
+    color: #4A3FB5 !important;
+  }
+
+  /* 导航栏头像样式 */
+  .nav-avatar-container {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.5rem;
+  }
+  .nav-avatar-container a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary);
+    font-size: 0.9rem;
+  }
+  .nav-avatar-container a:hover {
+    color: #5B4FCF;
+  }
+  .nav-avatar-img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(91, 79, 207, 0.3);
+  }
+  .nav-avatar-img:hover {
+    border-color: #5B4FCF;
+  }
+</style>
+
 <!-- 大尺寸 favicon — 浏览器新标签页 / PWA 用 -->
 <link rel="icon" type="image/png" sizes="96x96" href="{{ (site.Params.assets.favicon96x96 | default "favicon-96.png") | absURL }}">
 <link rel="icon" type="image/png" sizes="512x512" href="{{ (site.Params.assets.favicon512x512 | default "favicon-square.png") | absURL }}">
