@@ -30,6 +30,12 @@ theme = "PaperMod"
   description = "技术博客 - 记录学习与思考"
   author = "PMReason"
   defaultTheme = "auto"
+
+  [params.assets]
+    favicon = "favicon.ico"
+    favicon16x16 = "favicon-16x16.png"
+    favicon32x32 = "favicon-32x32.png"
+    apple_touch_icon = "apple-touch-icon.png"
   ShowReadingTime = true
   ShowShareButtons = true
   ShowPostNavLinks = true
