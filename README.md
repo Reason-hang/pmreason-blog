@@ -22,6 +22,18 @@ PMReason 是一个个人技术博客，用来沉淀产品、软硬件研发、AI
 
 这个仓库是博客源码的唯一真相源，适合保存可审计、可 diff、可回滚的小文件。
 
+## 5 个分层架构和对应内容
+
+PMReason 博客按“源码可回滚、媒体可迁移、部署可复现、密钥不裸奔、恢复有入口”的原则分成 5 层。GitHub 私有仓库主要保存第 1 层、第 2 层的小文件、第 3 层的脱敏配置和第 5 层文档；大媒体和密钥凭证不直接明文放入仓库。
+
+| 层级 | 层名 | 对应内容 | 备份方式 | 恢复方式 |
+|---|---|---|---|---|
+| Layer 1 | 博客源码层 | Markdown 文章、Hugo 配置、PaperMod 主题引用、自定义模板、自定义样式、文章 archetype | 明文提交到 GitHub 私有仓库，使用 commit/tag 回滚 | `git clone` 后执行 `git submodule update --init --recursive` 和 `hugo --minify` |
+| Layer 2 | 媒体资产层 | favicon、头像、首页 Banner、小封面、文章轻量配图；后续的大图片、视频、原始素材单独管理 | 小文件进 Git；大文件不进 Git，后续迁移到对象存储、NAS、移动硬盘或加密快照 | 小文件随仓库恢复；大文件按媒体清单从外部存储拉回或改用 CDN URL |
+| Layer 3 | 部署运行层 | GitHub Actions、Nginx 配置、VPS 部署目录、Cloudflare 域名/CDN/Tunnel 说明、Hugo 构建版本 | 脱敏配置和说明进 Git；真实 Secret 只放 GitHub Secrets、Cloudflare 后台或 VPS 本地环境 | `scripts/restore.sh` 构建并同步到 `/home/hermes/blog/public/`，必要时复制 `deploy/nginx/pmreason.nginx.conf` |
+| Layer 4 | 凭证密钥层 | GitHub Deploy Key、SSH 私钥、Cloudflare Token、R2/S3 Key、后台密码、API Token | 不明文进 Git；只记录变量名、用途和恢复说明；必要时用 age/sops 加密后备份到独立位置 | 先恢复密钥到 GitHub Secrets、Cloudflare 或 VPS 环境，再执行部署/恢复脚本 |
+| Layer 5 | 恢复治理层 | README、RESTORE、VERSIONING、备份清单、恢复检查清单、版本记录、脚本使用说明 | 明文进 Git，随每次重要改动更新 | 新机器按 README/RESTORE 操作，按检查清单确认首页、文章、RSS、搜索、图片和 Nginx 都正常 |
+
 | 内容 | 是否放入本仓库 | 说明 |
 |---|---:|---|
 | Markdown 文章 | 是 | `content/posts/` |
@@ -113,3 +125,4 @@ bash scripts/restore.sh
 |---|---|---|
 | `690544e` | 旧 README：月度备份记录格式 | 2026-06-10 前 |
 | `b39ba91` | 新架构：新手恢复文档 + backup/restore/verify 脚本 + Nginx 归档 | 2026-06-10 |
+| `本次提交` | README 增加 5 个分层架构和对应内容 | 2026-06-11 |
