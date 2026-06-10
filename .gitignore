@@ -1,5 +1,6 @@
 # Hugo generated files
 /public/
+.hugo_build.lock
 
 # OS files
 .DS_Store
@@ -12,6 +13,29 @@ Thumbs.db
 
 # Logs
 /home/hermes/logs/
+*.log
 
-# Hugo lock
-.hugo_build.lock
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# Large media and source assets should live outside Git
+media-local/
+media-originals/
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.zip
+*.7z
+*.rar
+*.psd
+*.fig
+*.sketch

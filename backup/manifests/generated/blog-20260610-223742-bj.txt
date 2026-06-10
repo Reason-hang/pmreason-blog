@@ -1,0 +1,42 @@
+PMReason Blog Backup
+time_bj=20260610-223742
+summary=backup: PMReason blog long-term baseline
+branch=main
+head_before=690544e0f967e8473d001886a313573fbee39d91
+hugo=hugo v0.147.0-7d0039b86ddd6397816cc3383cb0cfa481b15f32+extended linux/amd64 BuildDate=2025-04-25T15:26:28Z VendorInfo=gohugoio
+posts=5
+static_files=13
+assets_files=1
+
+tracked_files:
+.github/workflows/deploy.yml
+.gitignore
+.gitmodules
+README.md
+activate.sh
+archetypes/default.md
+assets/css/extended/theme.css
+"content/posts/2026-06-06-pmreason-\345\215\232\345\256\242\344\270\212\347\272\277.md"
+content/posts/2026-06-06-test.md
+"content/posts/2026-06-06-\347\274\226\350\276\221\345\231\250\346\265\213\350\257\225.md"
+content/posts/hello-world.md
+"content/posts/\347\254\254\344\270\200\346\254\241\347\224\250GitHub\345\206\231\345\215\232\345\256\242.md"
+hugo.toml
+layouts/index.html
+layouts/partials/extend_head.html
+layouts/partials/header.html
+pmreason.nginx.conf
+static/apple-touch-icon.png
+static/favicon-16x16.png
+static/favicon-32x32.png
+static/favicon-48.png
+static/favicon-96.png
+static/favicon-square.png
+static/favicon.ico
+static/hero-banner-small.png
+static/hero-banner.png
+static/nav-avatar.png
+static/nav-avatar@2x.png
+static/og-image.png
+static/site.webmanifest
+themes/PaperMod
