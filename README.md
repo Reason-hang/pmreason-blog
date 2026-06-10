@@ -112,5 +112,4 @@ bash scripts/restore.sh
 | 提交 | 版本说明概述 | 北京时间 |
 |---|---|---|
 | `690544e` | 旧 README：月度备份记录格式 | 2026-06-10 前 |
-| `待生成` | 新架构：新手恢复文档 + backup/restore/verify 脚本 + Nginx 归档 | 2026-06-10 |
-
+| `b39ba91` | 新架构：新手恢复文档 + backup/restore/verify 脚本 + Nginx 归档 | 2026-06-10 |
