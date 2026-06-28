@@ -19,6 +19,11 @@ theme = "PaperMod"
     name = "标签"
     url = "/tags/"
     weight = 30
+  [[menu.main]]
+    identifier = "daily-os"
+    name = "每日复盘工具"
+    url = "/tools/ceo-daily-os.html"
+    weight = 40
 
 [outputs]
   home = ["HTML", "RSS", "JSON"]
