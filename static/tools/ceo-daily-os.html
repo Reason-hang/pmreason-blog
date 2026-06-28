@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CEO 一日操作系统</title>
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface-2: #f0ede8;
+    --border: #e2ddd8;
+    --border-strong: #c8c3bc;
+    --text: #1a1916;
+    --text-2: #5a5750;
+    --text-3: #9a958e;
+    --accent: #2563eb;
+    --accent-bg: #eff6ff;
+    --accent-border: #bfdbfe;
+    --success: #16a34a;
+    --success-bg: #f0fdf4;
+    --warning: #d97706;
+    --warning-bg: #fffbeb;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --purple: #7c3aed;
+    --purple-bg: #f5f3ff;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141412;
+      --surface: #1e1d1b;
+      --surface-2: #252420;
+      --border: #2e2c28;
+      --border-strong: #3e3c38;
+      --text: #f0ede8;
+      --text-2: #a8a39c;
+      --text-3: #68635c;
+      --accent-bg: #1e2d4a;
+      --accent-border: #1d4ed8;
+      --success-bg: #0f2a1a;
+      --warning-bg: #2a1f0a;
+      --danger-bg: #2a0f0f;
+      --purple-bg: #1e1530;
+    }
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Layout ── */
+  .app { max-width: 760px; margin: 0 auto; padding: 0 16px 80px; }
+  .header {
+    padding: 32px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .header h1 { font-size: 22px; font-weight: 600; letter-spacing: -.3px; }
+  .header p { font-size: 13px; color: var(--text-3); margin-top: 4px; }
+  .date-badge {
+    font-size: 12px; font-weight: 500; color: var(--text-2);
+    background: var(--surface-2); border: 1px solid var(--border);
+    padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex; gap: 4px; margin-bottom: 24px;
+    background: var(--surface-2); padding: 4px; border-radius: 10px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex: 1; min-width: 64px; padding: 7px 12px;
+    font-size: 13px; font-weight: 500; color: var(--text-2);
+    background: transparent; border: none; border-radius: 7px;
+    cursor: pointer; transition: all .15s; white-space: nowrap; text-align: center;
+  }
+  .tab-btn:hover { color: var(--text); background: var(--surface); }
+  .tab-btn.active {
+    color: var(--text); background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 22px; margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .card-icon {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .icon-blue { background: var(--accent-bg); }
+  .icon-green { background: var(--success-bg); }
+  .icon-amber { background: var(--warning-bg); }
+  .icon-purple { background: var(--purple-bg); }
+  .icon-red { background: var(--danger-bg); }
+  .card-title { font-size: 15px; font-weight: 600; }
+  .card-sub { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+
+  /* ── Form Fields ── */
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block; font-size: 12px; font-weight: 500;
+    color: var(--text-2); margin-bottom: 5px;
+  }
+  .field label span.req { color: var(--accent); margin-left: 2px; }
+  .field input[type="text"],
+  .field textarea {
+    width: 100%; padding: 9px 12px;
+    font-size: 14px; font-family: inherit; color: var(--text);
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 7px; outline: none; transition: border-color .15s;
+    resize: vertical; line-height: 1.55;
+  }
+  .field input[type="text"]:focus,
+  .field textarea:focus { border-color: var(--accent); }
+  .field textarea { min-height: 70px; }
+  .field input[type="text"]::placeholder,
+  .field textarea::placeholder { color: var(--text-3); }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
+
+  /* ── Section Divider ── */
+  .section-label {
+    font-size: 11px; font-weight: 600; color: var(--text-3);
+    text-transform: uppercase; letter-spacing: .08em;
+    margin: 20px 0 12px; padding-left: 2px;
+  }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .btn {
+    padding: 9px 20px; font-size: 14px; font-weight: 500;
+    border-radius: 8px; cursor: pointer; border: 1px solid transparent;
+    transition: all .15s; font-family: inherit;
+  }
+  .btn-primary {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+  }
+  .btn-primary:hover { opacity: .88; }
+  .btn-secondary {
+    background: var(--surface); color: var(--text-2);
+    border-color: var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--border-strong); color: var(--text); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #1a1916; color: #f0ede8; font-size: 13px; font-weight: 500;
+    padding: 10px 20px; border-radius: 20px; opacity: 0;
+    transition: all .25s; pointer-events: none; z-index: 999; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── History List ── */
+  .history-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 10px; overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .history-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 18px; cursor: pointer; gap: 10px;
+  }
+  .history-head:hover { background: var(--surface-2); }
+  .history-date { font-size: 14px; font-weight: 600; }
+  .history-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .pill {
+    font-size: 11px; font-weight: 500; padding: 2px 8px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .pill-am { background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-border); }
+  .pill-pm { background: var(--purple-bg); color: var(--purple); border: 1px solid #c4b5fd; }
+  .pill-pct { background: var(--success-bg); color: var(--success); border: 1px solid #bbf7d0; }
+  .history-chevron { font-size: 11px; color: var(--text-3); transition: transform .2s; }
+  .history-item.open .history-chevron { transform: rotate(180deg); }
+  .history-body { display: none; padding: 0 18px 16px; border-top: 1px solid var(--border); }
+  .history-item.open .history-body { display: block; }
+  .history-section { margin-top: 14px; }
+  .history-section-title {
+    font-size: 11px; font-weight: 600; color: var(--text-3);
+    text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px;
+  }
+  .history-field { margin-bottom: 8px; }
+  .history-field-label { font-size: 11px; color: var(--text-3); margin-bottom: 2px; }
+  .history-field-val { font-size: 13px; color: var(--text-2); line-height: 1.55; }
+  .history-del {
+    font-size: 12px; color: var(--danger); background: none; border: none;
+    cursor: pointer; padding: 4px 8px; border-radius: 5px; margin-top: 12px;
+  }
+  .history-del:hover { background: var(--danger-bg); }
+
+  /* ── Stats ── */
+  .month-picker { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .month-picker select {
+    padding: 7px 12px; font-size: 14px; font-family: inherit; color: var(--text);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; cursor: pointer; outline: none;
+  }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .stat-num { font-size: 28px; font-weight: 700; letter-spacing: -.5px; line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text-3); margin-top: 5px; }
+  .stat-blue { color: var(--accent); }
+  .stat-green { color: var(--success); }
+  .stat-amber { color: var(--warning); }
+  .stat-purple { color: var(--purple); }
+
+  .insight-box {
+    background: var(--accent-bg); border: 1px solid var(--accent-border);
+    border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px;
+  }
+  .insight-box h3 { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+  .insight-list { list-style: none; }
+  .insight-list li {
+    font-size: 13px; color: var(--text-2); padding: 4px 0;
+    border-bottom: 1px solid var(--accent-border); display: flex; gap: 8px;
+  }
+  .insight-list li:last-child { border-bottom: none; }
+  .insight-list li::before { content: "→"; color: var(--accent); flex-shrink: 0; }
+
+  .principle-box {
+    background: var(--purple-bg); border: 1px solid #c4b5fd;
+    border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px;
+  }
+  .principle-box h3 { font-size: 13px; font-weight: 600; color: var(--purple); margin-bottom: 8px; }
+  .principle-item {
+    font-size: 13px; color: var(--text-2); padding: 5px 0;
+    border-bottom: 1px solid #ddd6fe; display: flex; gap: 8px; align-items: flex-start;
+  }
+  .principle-item:last-child { border-bottom: none; }
+  .principle-date { font-size: 11px; color: var(--text-3); white-space: nowrap; flex-shrink: 0; margin-top: 1px; }
+
+  .empty-state {
+    text-align: center; padding: 48px 24px; color: var(--text-3);
+  }
+  .empty-state .icon { font-size: 32px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── Completion bar ── */
+  .pct-bar-wrap { margin: 5px 0 0; }
+  .pct-bar-label { font-size: 11px; color: var(--text-3); margin-bottom: 4px; }
+  .pct-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .pct-bar-fill { height: 100%; background: var(--success); border-radius: 2px; transition: width .4s; }
+
+  /* ── Tip ── */
+  .tip {
+    font-size: 12px; color: var(--text-3); background: var(--surface-2);
+    border-left: 3px solid var(--border-strong); padding: 8px 12px;
+    border-radius: 0 6px 6px 0; margin-top: 10px; line-height: 1.6;
+  }
+
+  .save-indicator {
+    font-size: 12px; color: var(--success); display: none; align-items: center; gap: 4px;
+  }
+  .save-indicator.show { display: flex; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <h1>CEO 一日操作系统</h1>
+        <p>战略对齐 · 执行配置 · 能量管理 · 晚间复盘</p>
+      </div>
+      <div class="date-badge" id="todayBadge"></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('morning', this)">☀️ 早上布局</button>
+    <button class="tab-btn" onclick="switchTab('evening', this)">🌙 晚上复盘</button>
+    <button class="tab-btn" onclick="switchTab('history', this)">📋 历史记录</button>
+    <button class="tab-btn" onclick="switchTab('stats', this)">📊 月度统计</button>
+  </div>
+
+  <!-- ═══ MORNING PANEL ═══ -->
+  <div id="panel-morning" class="panel active">
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon icon-blue">🎯</div>
+        <div>
+          <div class="card-title">模块一：战略对齐</div>
+          <div class="card-sub">防止忙了一天但方向错了</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Q1 今天唯一最重要的战果是什么？<span class="req">*</span></label>
+        <input type="text" id="m_goal" placeholder="今天结束时，我必须拿到的1个结果是……（用数字或交付物定义）">
+      </div>
+      <div class="field">
+        <label>Q2 它推进了哪个长期目标？</label>
+        <input type="text" id="m_longterm" placeholder="对应的长期目标是……">
+      </div>
+      <div class="field">
+        <label>Q3 哪1件事如果完成，会带动其他事更容易完成？</label>
+        <input type="text" id="m_leverage" placeholder="今天最高杠杆的事是……">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon icon-green">✅</div>
+        <div>
+          <div class="card-title">模块二：执行配置</div>
+          <div class="card-sub">关键动作 · 决策 · 资源</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Q4 今天3个核心执行动作</label>
+        <textarea id="m_actions" placeholder="1. &#10;2. &#10;3. " style="min-height:82px"></textarea>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Q5 今天必须拍板的决策</label>
+          <textarea id="m_decisions" placeholder="必须做出的判断……"></textarea>
+        </div>
+        <div class="field">
+          <label>Q6 需要调动的人或资源</label>
+          <textarea id="m_resources" placeholder="需要联系谁、拿到什么信息……"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon icon-red">🛡️</div>
+        <div>
+          <div class="card-title">模块三：风险预案</div>
+          <div class="card-sub">如果-那么 · 提前而非临场应对</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Q7 今天最可能的阻塞点</label>
+        <input type="text" id="m_risk" placeholder="人/信息/决策/外部变化 哪个最可能卡住？">
+      </div>
+      <div class="field">
+        <label>Q8 预案（如果____，那么____）</label>
+        <input type="text" id="m_plan" placeholder="如果出现上述阻塞，我的应对动作是……">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon icon-amber">⚡</div>
+        <div>
+          <div class="card-title">模块四：能量配置</div>
+          <div class="card-sub">早上90分钟是生理黄金窗口</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Q9 深度工作时段</label>
+          <input type="text" id="m_deep" placeholder="上午 ___点 到 ___点">
+        </div>
+        <div class="field">
+          <label>今天坚决不做的事</label>
+          <input type="text" id="m_notdo" placeholder="保护注意力……">
+        </div>
+      </div>
+      <div class="tip">💡 高认知消耗任务（决策/创作/谈判）优先安排在上午。中午做10分钟校准，下午推进协同与沟通。</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveMorning()">保存早上布局</button>
+      <button class="btn btn-secondary" onclick="clearMorning()">清空重填</button>
+      <span class="save-indicator" id="mSaveIndicator">✓ 已保存</span>
+    </div>
+  </div>
+
+  <!-- ═══ EVENING PANEL ═══ -->
+  <div id="panel-evening" class="panel">
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon icon-blue">📊</div>
+        <div>
+          <div class="card-title">模块一：结果复盘</div>
+          <div class="card-sub">预期 vs 实际 · 对结果负责</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Q1 今天实际拿到了什么结果？</label>
+        <textarea id="e_result" placeholder="具体完成了什么，有没有数字/交付物……"></textarea>
+      </div>
+      <div class="field">
+        <label>Q2 完成度估算</label>
+        <input type="text" id="e_pct" placeholder="约 __% （相对今天早上定的战果）" oninput="updatePctBar()">
+        <div class="pct-bar-wrap">
+          <div class="pct-bar"><div class="pct-bar-fill" id="pctBarFill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Q3 哪些动作真正推动了结果？哪些只是忙碌？</label>
+        <textarea id="e_effective" placeholder="有效动作：……&#10;无效消耗：……"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon icon-red">🔍</div>
+        <div>
+          <div class="card-title">模块二：失败拆解</div>
+          <div class="card-sub">失败的信息密度远高于成功 —— Ray Dalio</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Q4 哪个细节拖慢了结果？根因是什么？</label>
+        <textarea id="e_fail" placeholder="拖慢原因：……&#10;根因（信息不足/优先级错/沟通差/能力短板）：……"></textarea>
+      </div>
+      <div class="field">
+        <label>Q5 今天的决策质量如何？有没有情绪化或惯性判断？</label>
+        <textarea id="e_decision" placeholder="哪个判断不够好，当时假设是什么，实际情况是什么……"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon icon-purple">💡</div>
+        <div>
+          <div class="card-title">模块三：经验抽象</div>
+          <div class="card-sub">从经历升级为原则库</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Q6 同类问题下次如何处理？</label>
+        <textarea id="e_next" placeholder="下次遇到类似情况，我会……"></textarea>
+      </div>
+      <div class="field">
+        <label>Q7 提炼成一句标准打法（存入原则库）</label>
+        <input type="text" id="e_principle" placeholder="以后遇到____，我先____，再____">
+      </div>
+      <div class="field">
+        <label>Q8 哪个流程/习惯可以优化，减少未来重复消耗？</label>
+        <input type="text" id="e_system" placeholder="可以建立的系统或模板是……">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-icon icon-green">🚀</div>
+        <div>
+          <div class="card-title">模块四：成长与预铺</div>
+          <div class="card-sub">今天的短板 + 明天的战果</div>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Q9 今天暴露的能力短板</label>
+          <textarea id="e_weakness" placeholder="产品判断/沟通/数据/决策/执行……"></textarea>
+        </div>
+        <div class="field">
+          <label>Q10 明天最重要战果 + 今晚可提前准备的</label>
+          <textarea id="e_tomorrow" placeholder="明天战果：……&#10;今晚准备：……"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveEvening()">保存晚上复盘</button>
+      <button class="btn btn-secondary" onclick="clearEvening()">清空重填</button>
+      <span class="save-indicator" id="eSaveIndicator">✓ 已保存</span>
+    </div>
+  </div>
+
+  <!-- ═══ HISTORY PANEL ═══ -->
+  <div id="panel-history" class="panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:14px;color:var(--text-2)" id="historyCount"></div>
+      <button class="btn btn-secondary" style="font-size:12px;padding:6px 14px" onclick="exportData()">导出数据 JSON</button>
+    </div>
+    <div id="historyList"></div>
+  </div>
+
+  <!-- ═══ STATS PANEL ═══ -->
+  <div id="panel-stats" class="panel">
+    <div class="month-picker">
+      <label style="font-size:13px;color:var(--text-2)">选择月份</label>
+      <select id="monthSelect" onchange="renderStats()"></select>
+    </div>
+    <div id="statsContent"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'ceo_daily_os_v1';
+
+// ── Data helpers ──
+function getData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+function setData(d) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+}
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ── Today badge ──
+(function() {
+  const d = new Date();
+  const days = ['日','一','二','三','四','五','六'];
+  document.getElementById('todayBadge').textContent =
+    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · 周${days[d.getDay()]}`;
+})();
+
+// ── Tab switching ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'history') renderHistory();
+  if (name === 'stats') { buildMonthPicker(); renderStats(); }
+  if (name === 'morning') loadMorning();
+  if (name === 'evening') loadEvening();
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── Save Morning ──
+function saveMorning() {
+  const data = getData();
+  const key = todayKey();
+  if (!data[key]) data[key] = {};
+  data[key].morning = {
+    goal: v('m_goal'), longterm: v('m_longterm'), leverage: v('m_leverage'),
+    actions: v('m_actions'), decisions: v('m_decisions'), resources: v('m_resources'),
+    risk: v('m_risk'), plan: v('m_plan'), deep: v('m_deep'), notdo: v('m_notdo'),
+    savedAt: new Date().toISOString()
+  };
+  setData(data);
+  const ind = document.getElementById('mSaveIndicator');
+  ind.classList.add('show');
+  setTimeout(() => ind.classList.remove('show'), 2500);
+  showToast('✅ 早上布局已保存');
+}
+
+function loadMorning() {
+  const data = getData();
+  const m = data[todayKey()]?.morning;
+  if (!m) return;
+  set('m_goal', m.goal); set('m_longterm', m.longterm); set('m_leverage', m.leverage);
+  set('m_actions', m.actions); set('m_decisions', m.decisions); set('m_resources', m.resources);
+  set('m_risk', m.risk); set('m_plan', m.plan); set('m_deep', m.deep); set('m_notdo', m.notdo);
+}
+
+function clearMorning() {
+  ['m_goal','m_longterm','m_leverage','m_actions','m_decisions',
+   'm_resources','m_risk','m_plan','m_deep','m_notdo'].forEach(id => set(id, ''));
+}
+
+// ── Save Evening ──
+function saveEvening() {
+  const pctRaw = v('e_pct');
+  const data = getData();
+  const key = todayKey();
+  if (!data[key]) data[key] = {};
+  data[key].evening = {
+    result: v('e_result'), pct: pctRaw,
+    effective: v('e_effective'), fail: v('e_fail'), decision: v('e_decision'),
+    next: v('e_next'), principle: v('e_principle'), system: v('e_system'),
+    weakness: v('e_weakness'), tomorrow: v('e_tomorrow'),
+    savedAt: new Date().toISOString()
+  };
+  setData(data);
+  const ind = document.getElementById('eSaveIndicator');
+  ind.classList.add('show');
+  setTimeout(() => ind.classList.remove('show'), 2500);
+  showToast('✅ 晚上复盘已保存');
+}
+
+function loadEvening() {
+  const data = getData();
+  const e = data[todayKey()]?.evening;
+  if (!e) return;
+  set('e_result', e.result); set('e_pct', e.pct); set('e_effective', e.effective);
+  set('e_fail', e.fail); set('e_decision', e.decision);
+  set('e_next', e.next); set('e_principle', e.principle); set('e_system', e.system);
+  set('e_weakness', e.weakness); set('e_tomorrow', e.tomorrow);
+  updatePctBar();
+}
+
+function clearEvening() {
+  ['e_result','e_pct','e_effective','e_fail','e_decision',
+   'e_next','e_principle','e_system','e_weakness','e_tomorrow'].forEach(id => set(id, ''));
+  document.getElementById('pctBarFill').style.width = '0%';
+}
+
+function updatePctBar() {
+  const raw = v('e_pct');
+  const num = parseInt(raw.replace(/[^0-9]/g,''));
+  const pct = isNaN(num) ? 0 : Math.min(100, Math.max(0, num));
+  document.getElementById('pctBarFill').style.width = pct + '%';
+}
+
+// ── History ──
+function renderHistory() {
+  const data = getData();
+  const keys = Object.keys(data).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)).sort().reverse();
+  const el = document.getElementById('historyList');
+  const countEl = document.getElementById('historyCount');
+
+  if (!keys.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无记录，先去填写今天的早上布局或晚上复盘吧</p></div>';
+    countEl.textContent = '';
+    return;
+  }
+  countEl.textContent = `共 ${keys.length} 天记录`;
+  el.innerHTML = keys.map(k => {
+    const d = data[k];
+    const hasMorning = !!d.morning;
+    const hasEvening = !!d.evening;
+    const pctNum = hasEvening ? parseInt((d.evening.pct||'').replace(/[^0-9]/g,'')) : NaN;
+    const pctShow = !isNaN(pctNum) ? pctNum + '%' : '';
+    const dateLabel = formatDateLabel(k);
+
+    return `<div class="history-item" id="hi_${k}">
+      <div class="history-head" onclick="toggleHistory('${k}')">
+        <div>
+          <div class="history-date">${dateLabel}</div>
+        </div>
+        <div class="history-meta">
+          ${hasMorning ? '<span class="pill pill-am">早上布局</span>' : ''}
+          ${hasEvening ? '<span class="pill pill-pm">晚上复盘</span>' : ''}
+          ${pctShow ? `<span class="pill pill-pct">${pctShow}</span>` : ''}
+          <span class="history-chevron">▼</span>
+        </div>
+      </div>
+      <div class="history-body">
+        ${hasMorning ? renderHistoryMorning(d.morning) : ''}
+        ${hasEvening ? renderHistoryEvening(d.evening) : ''}
+        <button class="history-del" onclick="deleteDay('${k}')">删除这天记录</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHistoryMorning(m) {
+  const fields = [
+    ['今天战果', m.goal], ['长期目标', m.longterm], ['最高杠杆', m.leverage],
+    ['核心动作', m.actions], ['必须决策', m.decisions], ['所需资源', m.resources],
+    ['风险预判', m.risk], ['如果-那么预案', m.plan],
+    ['深度工作时段', m.deep], ['今天不做', m.notdo]
+  ].filter(([,v]) => v && v.trim());
+  if (!fields.length) return '';
+  return `<div class="history-section">
+    <div class="history-section-title">☀️ 早上布局</div>
+    ${fields.map(([l,v]) => `<div class="history-field">
+      <div class="history-field-label">${l}</div>
+      <div class="history-field-val">${escHtml(v)}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderHistoryEvening(e) {
+  const fields = [
+    ['实际结果', e.result], ['完成度', e.pct], ['有效/无效动作', e.effective],
+    ['失败根因', e.fail], ['决策质量', e.decision],
+    ['下次打法', e.next], ['提炼原则', e.principle], ['系统优化', e.system],
+    ['能力短板', e.weakness], ['明天战果+预备', e.tomorrow]
+  ].filter(([,v]) => v && v.trim());
+  if (!fields.length) return '';
+  return `<div class="history-section">
+    <div class="history-section-title">🌙 晚上复盘</div>
+    ${fields.map(([l,v]) => `<div class="history-field">
+      <div class="history-field-label">${l}</div>
+      <div class="history-field-val">${escHtml(v)}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function toggleHistory(key) {
+  const el = document.getElementById('hi_' + key);
+  el.classList.toggle('open');
+}
+
+function deleteDay(key) {
+  if (!confirm(`确认删除 ${key} 的所有记录？此操作不可撤销。`)) return;
+  const data = getData();
+  delete data[key];
+  setData(data);
+  renderHistory();
+  showToast('已删除');
+}
+
+// ── Stats ──
+function buildMonthPicker() {
+  const data = getData();
+  const keys = Object.keys(data).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k));
+  const months = [...new Set(keys.map(k => k.slice(0,7)))].sort().reverse();
+  const sel = document.getElementById('monthSelect');
+  const cur = sel.value;
+  sel.innerHTML = months.map(m => `<option value="${m}">${m.replace('-','年')}月</option>`).join('');
+  if (cur && months.includes(cur)) sel.value = cur;
+}
+
+function renderStats() {
+  const month = document.getElementById('monthSelect').value;
+  const data = getData();
+  const el = document.getElementById('statsContent');
+  if (!month) { el.innerHTML = '<div class="empty-state"><div class="icon">📊</div><p>暂无数据</p></div>'; return; }
+
+  const days = Object.keys(data).filter(k => k.startsWith(month) && /^\d{4}-\d{2}-\d{2}$/.test(k));
+  if (!days.length) { el.innerHTML = '<div class="empty-state"><div class="icon">📊</div><p>本月暂无记录</p></div>'; return; }
+
+  const totalDays = days.length;
+  const morningDays = days.filter(k => !!data[k].morning).length;
+  const eveningDays = days.filter(k => !!data[k].evening).length;
+  const bothDays = days.filter(k => data[k].morning && data[k].evening).length;
+
+  // Avg completion
+  const pctNums = days.map(k => {
+    const e = data[k].evening;
+    if (!e) return null;
+    const n = parseInt((e.pct||'').replace(/[^0-9]/g,''));
+    return isNaN(n) ? null : Math.min(100, n);
+  }).filter(n => n !== null);
+  const avgPct = pctNums.length ? Math.round(pctNums.reduce((a,b)=>a+b,0)/pctNums.length) : null;
+
+  // Principles
+  const principles = days.map(k => {
+    const e = data[k].evening;
+    if (!e || !e.principle || !e.principle.trim()) return null;
+    return { date: k, text: e.principle.trim() };
+  }).filter(Boolean);
+
+  // Top goals
+  const goals = days.map(k => {
+    const m = data[k].morning;
+    if (!m || !m.goal || !m.goal.trim()) return null;
+    return m.goal.trim();
+  }).filter(Boolean);
+
+  // Weaknesses
+  const weaknesses = days.map(k => {
+    const e = data[k].evening;
+    if (!e || !e.weakness || !e.weakness.trim()) return null;
+    return e.weakness.trim();
+  }).filter(Boolean);
+
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num stat-blue">${totalDays}</div><div class="stat-label">记录天数</div></div>
+      <div class="stat-card"><div class="stat-num stat-amber">${morningDays}</div><div class="stat-label">早上布局</div></div>
+      <div class="stat-card"><div class="stat-num stat-purple">${eveningDays}</div><div class="stat-label">晚上复盘</div></div>
+      <div class="stat-card"><div class="stat-num stat-green">${avgPct !== null ? avgPct+'%' : '—'}</div><div class="stat-label">平均完成度</div></div>
+    </div>
+
+    ${goals.length ? `
+    <div class="insight-box">
+      <h3>📌 本月战果目标（共 ${goals.length} 条）</h3>
+      <ul class="insight-list">
+        ${goals.slice(0, 8).map(g => `<li>${escHtml(g)}</li>`).join('')}
+        ${goals.length > 8 ? `<li style="color:var(--text-3);font-size:12px">…还有 ${goals.length-8} 条</li>` : ''}
+      </ul>
+    </div>` : ''}
+
+    ${principles.length ? `
+    <div class="principle-box">
+      <h3>🧠 本月原则库积累（共 ${principles.length} 条）</h3>
+      ${principles.map(p => `
+        <div class="principle-item">
+          <span class="principle-date">${p.date}</span>
+          <span style="font-size:13px;color:var(--text-2)">${escHtml(p.text)}</span>
+        </div>`).join('')}
+    </div>` : ''}
+
+    ${weaknesses.length ? `
+    <div class="insight-box" style="background:var(--warning-bg);border-color:#fcd34d">
+      <h3 style="color:var(--warning)">⚠️ 本月暴露的能力短板</h3>
+      <ul class="insight-list" style="--accent:var(--warning)">
+        ${weaknesses.slice(0, 6).map(w => `<li style="border-color:#fcd34d">${escHtml(w)}</li>`).join('')}
+      </ul>
+    </div>` : ''}
+
+    <div class="card" style="margin-top:6px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text-2)">月度完成度趋势</div>
+      ${renderMiniChart(days, data)}
+    </div>
+
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text-2)">月度总结建议</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+        ${genSummary(totalDays, morningDays, eveningDays, avgPct, principles.length)}
+      </div>
+    </div>
+  `;
+}
+
+function renderMiniChart(days, data) {
+  const sorted = days.slice().sort();
+  if (!sorted.length) return '';
+  const barW = Math.max(12, Math.min(28, Math.floor(580 / sorted.length) - 4));
+  const bars = sorted.map(k => {
+    const e = data[k].evening;
+    const pct = e ? Math.min(100, parseInt((e.pct||'').replace(/[^0-9]/g,''))||0) : 0;
+    const hasMorning = !!data[k].morning;
+    const color = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : pct > 0 ? 'var(--danger)' : (hasMorning ? 'var(--accent)' : 'var(--border)');
+    const label = k.slice(8);
+    const title = `${k}\\n完成度: ${pct ? pct+'%' : '未记录复盘'}`;
+    return `<div title="${title}" style="display:flex;flex-direction:column;align-items:center;gap:3px">
+      <div style="width:${barW}px;height:${Math.max(3, pct * 80 / 100)}px;background:${color};border-radius:3px 3px 0 0;transition:height .3s;min-height:3px"></div>
+      <div style="font-size:10px;color:var(--text-3)">${label}</div>
+    </div>`;
+  }).join('');
+  return `<div style="display:flex;align-items:flex-end;gap:3px;height:100px;padding-bottom:18px;overflow-x:auto">${bars}</div>
+    <div style="font-size:11px;color:var(--text-3);margin-top:4px">
+      <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span style="width:8px;height:8px;border-radius:2px;background:var(--success);display:inline-block"></span>≥80%</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span style="width:8px;height:8px;border-radius:2px;background:var(--warning);display:inline-block"></span>50-79%</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span style="width:8px;height:8px;border-radius:2px;background:var(--danger);display:inline-block"></span><50%</span>
+      <span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--accent);display:inline-block"></span>只有早上</span>
+    </div>`;
+}
+
+function genSummary(total, morning, evening, avgPct, principles) {
+  const lines = [];
+  const consistency = Math.round(evening / Math.max(1, total) * 100);
+  lines.push(`本月共记录 <strong>${total} 天</strong>，早上布局 ${morning} 次，晚上复盘 ${evening} 次，复盘坚持率 <strong>${consistency}%</strong>。`);
+  if (avgPct !== null) {
+    if (avgPct >= 80) lines.push('平均完成度优秀，继续保持高标准目标设定。');
+    else if (avgPct >= 60) lines.push('完成度良好，重点检查是否有系统性的干扰因素导致未能100%达成。');
+    else lines.push('完成度偏低，建议回顾早上的战果定义是否过于宏大，或者执行中的阻塞点是否有规律性。');
+  }
+  if (principles >= 5) lines.push(`本月积累了 <strong>${principles} 条原则</strong>，知识复利正在形成。`);
+  else if (principles > 0) lines.push(`本月积累了 ${principles} 条原则，建议每天坚持提炼一句，原则库是最值钱的长期资产。`);
+  else lines.push('本月原则库尚未积累，建议在每天晚上复盘时强制提炼一句标准打法。');
+  if (consistency < 50) lines.push('晚上复盘坚持率不足50%，建议设置固定的提醒时间（如每晚21:00）。');
+  return lines.join('<br>');
+}
+
+// ── Export ──
+function exportData() {
+  const data = getData();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `ceo-daily-os-${todayKey()}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📦 数据已导出');
+}
+
+// ── Helpers ──
+function v(id) { return (document.getElementById(id)?.value || '').trim(); }
+function set(id, val) { const el = document.getElementById(id); if (el) el.value = val || ''; }
+function escHtml(str) {
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+function formatDateLabel(k) {
+  const d = new Date(k + 'T00:00:00');
+  const days = ['日','一','二','三','四','五','六'];
+  return `${k} · 周${days[d.getDay()]}`;
+}
+
+// ── Init ──
+loadMorning();
+</script>
+</body>
+</html>
