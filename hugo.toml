@@ -22,7 +22,7 @@ theme = "PaperMod"
   [[menu.main]]
     identifier = "daily-os"
     name = "每日复盘工具"
-    url = "/tools/ceo-daily-os.html"
+    url = "/tools/daily-os/"
     weight = 40
 
 [outputs]
