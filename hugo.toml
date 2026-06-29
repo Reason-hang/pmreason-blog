@@ -20,6 +20,11 @@ theme = "PaperMod"
     url = "/tags/"
     weight = 30
   [[menu.main]]
+    identifier = "customized-tools"
+    name = "定制化工具"
+    url = "/customized%20text%20processing%20tools/"
+    weight = 35
+  [[menu.main]]
     identifier = "daily-os"
     name = "每日复盘工具"
     url = "/tools/daily-os/"

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>定制化文本处理工具</title>
+<style>
+  :root{
+    --bg-page: #ffffff;
+    --bg-panel: #ffffff;
+    --panel-border: #dde3dd;
+    --text-main: #1d241d;
+    --text-dim: #767f76;
+    --accent: #3A8C3F;
+    --accent-hover: #327536;
+    --accent-text: #ffffff;
+    --accent-soft: rgba(58,140,63,0.08);
+    --accent-soft-border: rgba(58,140,63,0.4);
+    --btn-bg: #ffffff;
+    --btn-border: #d7dbd7;
+    --btn-hover-bg: #f1f5f1;
+    --toast-bg: #ffffff;
+    --toast-text: #1d241d;
+    --toast-border: #dde3dd;
+    --divider-color: #dde3dd;
+  }
+
+  [data-theme="dark"]{
+    --bg-page: #121512;
+    --bg-panel: #191d19;
+    --panel-border: #2d332d;
+    --text-main: #edf1ed;
+    --text-dim: #8d958d;
+    --accent: #3A8C3F;
+    --accent-hover: #46a04a;
+    --accent-text: #ffffff;
+    --accent-soft: rgba(58,140,63,0.2);
+    --accent-soft-border: rgba(70,160,74,0.5);
+    --btn-bg: #191d19;
+    --btn-border: #333a33;
+    --btn-hover-bg: #222822;
+    --toast-bg: #1f241f;
+    --toast-text: #edf1ed;
+    --toast-border: #333a33;
+    --divider-color: #2d332d;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+
+  body{
+    min-height: 100vh;
+    background: var(--bg-page);
+    color: var(--text-main);
+    /* 系统字体栈：按平台依次匹配各自最规范的原生字体（拉丁文与中文分别匹配），
+       而不是依赖某一个平台才有的字体，避免在其他平台上缺字退化成丑陋的默认衬线体 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+      "Source Han Sans SC", "Noto Sans CJK SC", "WenQuanYi Micro Hei",
+      Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+    padding: 24px 40px 28px;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .page-head{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+  }
+
+  /* 标题块用 inline-block，宽度由内部较宽的一行（标题本身）自然撑开；
+     下方三句短句再用 flex 在这同一个宽度内均匀分布，从而实现“上下等长对齐”，
+     且完全依赖实际渲染宽度自适应，不写死像素值，任何平台/字体下都能自动对齐 */
+  .title-block{
+    display: inline-block;
+  }
+
+  .page-head h1{
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    letter-spacing: 0.3px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .tagline{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    color: var(--text-dim);
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .theme-toggle{
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--btn-border);
+    background: var(--btn-bg);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+  }
+
+  .theme-toggle:hover{
+    background: var(--btn-hover-bg);
+  }
+
+  .theme-toggle:active{
+    transform: scale(0.95);
+  }
+
+  .theme-toggle svg{
+    width: 20px;
+    height: 20px;
+  }
+
+  .toolbar{
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  button.tool-btn{
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    appearance: none;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+  }
+
+  button.tool-btn:hover{
+    background: var(--btn-hover-bg);
+  }
+
+  button.tool-btn:active{
+    transform: scale(0.98);
+  }
+
+  /* 处理类按钮：深绿色背景 + 白色文字 */
+  button.tool-btn.action{
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  button.tool-btn.action:hover{
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+
+  button.tool-btn:disabled{
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .toolbar-divider{
+    width: 1px;
+    height: 24px;
+    background: var(--divider-color);
+    margin: 0 4px;
+    flex-shrink: 0;
+  }
+
+  .columns{
+    display: flex;
+    gap: 24px;
+    flex: 1;
+  }
+
+  .column{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .col-header{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .col-title{
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    flex-shrink: 0;
+  }
+
+  .col-stats{
+    font-size: 13px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .col-stats b{
+    color: var(--text-main);
+    font-weight: 600;
+  }
+
+  .textarea-wrap{
+    position: relative;
+    flex: 1;
+    display: flex;
+  }
+
+  textarea{
+    flex: 1;
+    width: 100%;
+    min-height: 460px;
+    resize: vertical;
+    background: var(--bg-panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    color: var(--text-main);
+    font-size: 15px;
+    line-height: 1.6;
+    /* 等宽字体优先保证拉丁字符/数字对齐，后面补齐各平台中文字体兜底，
+       避免在 Android / Linux 等没有前面字体的设备上中文显示退化成默认衬线体 */
+    font-family: "SF Mono", Consolas, "Cascadia Mono", "Roboto Mono", Menlo, Monaco,
+      monospace, "PingFang SC", "Microsoft YaHei", "Source Han Sans SC",
+      "Noto Sans CJK SC", "WenQuanYi Micro Hei", sans-serif;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, color 0.2s ease;
+  }
+
+  textarea::placeholder{
+    color: var(--text-dim);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+      "Source Han Sans SC", "Noto Sans CJK SC", "WenQuanYi Micro Hei",
+      Helvetica, Arial, sans-serif;
+  }
+
+  textarea:focus{
+    border-color: var(--accent-soft-border);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  /* 顶部居中 toast 轻提示，参考企业级 ERP 系统的消息提示样式 */
+  .toast{
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-16px);
+    background: var(--toast-bg);
+    color: var(--toast-text);
+    border: 1px solid var(--toast-border);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    padding: 11px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 999;
+  }
+
+  .toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .toast svg{
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--accent);
+  }
+
+  @media (max-width: 860px){
+    .columns{
+      flex-direction: column;
+    }
+    textarea{
+      min-height: 260px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="page-head">
+    <div class="title-block">
+      <h1>定制化文本处理工具</h1>
+      <div class="tagline">
+        <span>一键处理</span><span>本地运行</span><span>永久免费</span>
+      </div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题" title="切换浅色/深色主题">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="toolbar">
+    <button class="tool-btn" id="btnPaste">粘贴</button>
+    <button class="tool-btn" id="btnCopy">复制结果</button>
+    <button class="tool-btn" id="btnClear">清空</button>
+    <div class="toolbar-divider"></div>
+    <button class="tool-btn action" id="btnConvert">MD转纯文本</button>
+    <button class="tool-btn action" id="btnRemoveCR">去除回车</button>
+    <button class="tool-btn action" id="btnMultiToSingle">多行换成一行</button>
+    <button class="tool-btn action" id="btnDeleteLineBreaks">删除回车换行</button>
+    <button class="tool-btn action" id="btnRemoveBlankLines">去除空行</button>
+    <button class="tool-btn action" id="btnRemoveSpaces">去除空格</button>
+    <button class="tool-btn action" id="btnAddNumbering">序号添加</button>
+    <button class="tool-btn action" id="btnRemoveNumbering">序号移除</button>
+  </div>
+
+  <div class="columns">
+    <div class="column">
+      <div class="col-header">
+        <span class="col-title">输入框</span>
+        <span class="col-stats">字数：<b id="inputWordCount">0</b>　字符数：<b id="inputCharCount">0</b></span>
+      </div>
+      <div class="textarea-wrap">
+        <textarea id="inputArea" placeholder="在此粘贴或输入文本…"></textarea>
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="col-header">
+        <span class="col-title">输出框</span>
+        <span class="col-stats">字数：<b id="outputWordCount">0</b>　字符数：<b id="outputCharCount">0</b></span>
+      </div>
+      <div class="textarea-wrap">
+        <textarea id="outputArea" placeholder="处理后的结果将显示在这里，支持直接编辑…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span id="toastText"></span>
+  </div>
+
+<script>
+(function(){
+
+  const inputArea = document.getElementById('inputArea');
+  const outputArea = document.getElementById('outputArea');
+  const inputWordCount = document.getElementById('inputWordCount');
+  const inputCharCount = document.getElementById('inputCharCount');
+  const outputWordCount = document.getElementById('outputWordCount');
+  const outputCharCount = document.getElementById('outputCharCount');
+  const btnPaste = document.getElementById('btnPaste');
+  const btnConvert = document.getElementById('btnConvert');
+  const btnCopy = document.getElementById('btnCopy');
+  const btnClear = document.getElementById('btnClear');
+  const btnRemoveCR = document.getElementById('btnRemoveCR');
+  const btnMultiToSingle = document.getElementById('btnMultiToSingle');
+  const btnDeleteLineBreaks = document.getElementById('btnDeleteLineBreaks');
+  const btnRemoveBlankLines = document.getElementById('btnRemoveBlankLines');
+  const btnRemoveSpaces = document.getElementById('btnRemoveSpaces');
+  const btnAddNumbering = document.getElementById('btnAddNumbering');
+  const btnRemoveNumbering = document.getElementById('btnRemoveNumbering');
+  const toast = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  const themeToggle = document.getElementById('themeToggle');
+
+  // ---------- 主题切换（默认浅色，记住用户选择） ----------
+  const THEME_KEY = 'md2text-theme';
+
+  function applyTheme(theme){
+    if(theme === 'dark'){
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }else{
+      document.documentElement.removeAttribute('data-theme');
+    }
+    try{ localStorage.setItem(THEME_KEY, theme); }catch(e){}
+  }
+
+  let savedTheme = 'light';
+  try{ savedTheme = localStorage.getItem(THEME_KEY) || 'light'; }catch(e){}
+  applyTheme(savedTheme);
+
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    applyTheme(isDark ? 'light' : 'dark');
+  });
+
+  // ---------- 字数 / 字符数统计 ----------
+  function countChars(text){
+    return text.length;
+  }
+
+  // 字数：中文按字计数，英文按单词计数，中英混排都覆盖到
+  function countWords(text){
+    if(!text) return 0;
+    const cjkMatches = text.match(/[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7a3]/g) || [];
+    const withoutCJK = text.replace(/[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7a3]/g, ' ');
+    const wordMatches = withoutCJK.match(/[A-Za-z0-9_]+/g) || [];
+    return cjkMatches.length + wordMatches.length;
+  }
+
+  function updateInputStats(){
+    const inText = inputArea.value;
+    inputWordCount.textContent = countWords(inText);
+    inputCharCount.textContent = countChars(inText);
+  }
+
+  function updateOutputStats(){
+    const outText = outputArea.value;
+    outputWordCount.textContent = countWords(outText);
+    outputCharCount.textContent = countChars(outText);
+  }
+
+  function updateAllStats(){
+    updateInputStats();
+    updateOutputStats();
+  }
+
+  // ---------- Markdown 转纯文本核心逻辑 ----------
+  function markdownToPlainText(md){
+    if(!md) return '';
+
+    let text = md.replace(/\r\n/g, '\n');
+
+    // 1. 提取代码块内容（围栏式 ```），先占位保护，避免内部内容被其他规则误处理
+    const codeBlocks = [];
+    text = text.replace(/```[^\n]*\n([\s\S]*?)```/g, function(match, code){
+      codeBlocks.push(code.replace(/\n$/, ''));
+      return '\u0000CODEBLOCK' + (codeBlocks.length - 1) + '\u0000';
+    });
+
+    // 缩进式代码块（4空格或1个tab开头的连续行）——保留内容，去掉缩进
+    text = text.replace(/(^|\n)((?:[ ]{4}|\t).*(?:\n(?:[ ]{4}|\t).*)*)/g, function(match, lead, block){
+      const cleaned = block.split('\n').map(line => line.replace(/^(?:[ ]{4}|\t)/, '')).join('\n');
+      return lead + cleaned;
+    });
+
+    // 2. 表格处理：整块匹配「表头行 + 分隔行 + 数据行」，拍平为每行一段文字，列用空格分隔
+    text = text.replace(/^[ \t]*\|?(.+\|.+)\|?[ \t]*\n[ \t]*\|?[ \t]*:?-+:?[ \t]*(\|[ \t]*:?-+:?[ \t]*)*\|?[ \t]*\n((?:[ \t]*\|?.*\|.*\|?[ \t]*\n?)*)/gm,
+      function(match, headerLine, _sep, bodyLines){
+        const rows = [headerLine, ...bodyLines.split('\n').filter(r => r.trim().length > 0)];
+        const lines = rows.map(row => {
+          let cells = row.trim();
+          cells = cells.replace(/^\|/, '').replace(/\|$/, '');
+          const parts = cells.split('|').map(c => c.trim());
+          return parts.join(' ');
+        });
+        return lines.join('\n') + '\n';
+      }
+    );
+
+    const lines = text.split('\n');
+    const out = [];
+
+    for(let raw of lines){
+      let line = raw;
+
+      // 跳过占位代码块标记，稍后统一还原
+      const codePlaceholderMatch = line.match(/^\u0000CODEBLOCK(\d+)\u0000$/);
+      if(codePlaceholderMatch){
+        out.push(codeBlocks[parseInt(codePlaceholderMatch[1], 10)]);
+        continue;
+      }
+
+      // 水平分割线 ---  ***  ___
+      if(/^\s*([-*_])\1{2,}\s*$/.test(line)){
+        continue;
+      }
+
+      // 标题 #~######
+      line = line.replace(/^\s{0,3}#{1,6}\s+(.*?)\s*#*\s*$/, '$1');
+
+      // 引用块 >（支持多重 >>）
+      line = line.replace(/^\s{0,3}(?:>\s?)+/, '');
+
+      // 无序列表标记 - * +（去掉符号，保留内容）
+      line = line.replace(/^(\s*)[-*+]\s+(?=\S)/, '$1');
+
+      // 有序列表 1. 2. 3. —— 保留数字序号标记，不做处理
+
+      // 任务列表 - [ ] / - [x]（兜底清理残留方括号）
+      line = line.replace(/^(\s*)\[[ xX]\]\s+/, '$1');
+
+      out.push(line);
+    }
+
+    text = out.join('\n');
+
+    // 3. 行内规则（对整段文本统一处理）
+
+    // 先保护转义字符（如 \* \_ \# ），避免被后续的粗体/斜体等规则误识别
+    const escapes = [];
+    text = text.replace(/\\([\\`*_{}\[\]()#+\-.!>~|])/g, function(match, ch){
+      escapes.push(ch);
+      return '\u0001ESC' + (escapes.length - 1) + '\u0001';
+    });
+
+    // 图片 ![alt](url) -> alt
+    text = text.replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1');
+
+    // 链接 [text](url) -> text
+    text = text.replace(/\[([^\]]+)\]\(([^)]*)\)/g, '$1');
+
+    // 引用式链接定义 [id]: url "title" -> 标题文字和网址都保留（格式：标题 - 网址），网址原文不做任何修改
+    // 无标题时只保留网址本身（网址是唯一有效信息）
+    text = text.replace(/^\s{0,3}\[([^\]]+)\]:\s*(\S+)(?:\s+(?:"([^"]*)"|'([^']*)'|\(([^)]*)\)))?\s*$/gm,
+      function(match, id, url, t1, t2, t3){
+        const title = t1 || t2 || t3;
+        return title ? (title + ' - ' + url) : url;
+      }
+    );
+
+    // 行内代码 `code` -> code
+    text = text.replace(/`([^`]+)`/g, '$1');
+
+    // 粗体+斜体 ***text*** / ___text___
+    text = text.replace(/(\*\*\*|___)([^*_].*?)\1/g, '$2');
+
+    // 粗体 **text** / __text__
+    text = text.replace(/(\*\*|__)([^*_].*?)\1/g, '$2');
+
+    // 斜体 *text* / _text_
+    text = text.replace(/(\*|_)([^*_].*?)\1/g, '$2');
+
+    // 删除线 ~~text~~
+    text = text.replace(/~~(.*?)~~/g, '$1');
+
+    // 还原转义字符为原字符
+    text = text.replace(/\u0001ESC(\d+)\u0001/g, function(_, idx){
+      return escapes[parseInt(idx, 10)];
+    });
+
+    // 还原代码块占位（若占位独占一行已在上面处理，这里兜底处理混在行内的情况）
+    text = text.replace(/\u0000CODEBLOCK(\d+)\u0000/g, function(_, idx){
+      return codeBlocks[parseInt(idx, 10)];
+    });
+
+    // 清理多余空行：3个以上连续空行收缩为2个（保留段落结构）
+    text = text.replace(/\n{3,}/g, '\n\n');
+
+    // 清理每行行尾空格
+    text = text.split('\n').map(l => l.replace(/[ \t]+$/, '')).join('\n');
+
+    return text.trim();
+  }
+
+  // ===================================================================
+  // 新增 7 个独立文本处理函数
+  // 核心原则：只处理目标符号，不改原文正文内容；互不联动，不附加其他清理逻辑
+  // 统一换行兼容：\r\n（Windows）、\n（Mac/Unix）、\r（旧 Mac）
+  // ===================================================================
+
+  // 一、去除回车：把 \r\n 和单独的 \r 都规整为 \n，保留原有换行结构
+  function removeCarriageReturns(text){
+    if(!text) return '';
+    return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  }
+
+  // 二、多行换成一行：每行原文用空格拼接（不使用中文逗号）；连续换行（含空行）只生成一个空格
+  function multiLineToSingleLine(text){
+    if(!text) return '';
+    const lines = text.split(/\r\n|\r|\n/);
+    const nonEmptyLines = lines.filter(line => line.length > 0);
+    return nonEmptyLines.join(' ');
+  }
+
+  // 三、删除回车换行：直接删掉所有换行符，不添加任何连接符
+  function deleteLineBreaks(text){
+    if(!text) return '';
+    return text.replace(/\r\n|\r|\n/g, '');
+  }
+
+  // 四、去除空行：删除完全为空、或只包含空格/Tab/全角空格的行，保留有内容的行及其原有顺序
+  function removeBlankLines(text){
+    if(!text) return '';
+    const lines = text.split(/\r\n|\r|\n/);
+    const filtered = lines.filter(line => line.replace(/[ \t\u3000]+/g, '').length > 0);
+    return filtered.join('\n');
+  }
+
+  // 五、去除空格：删除半角空格、全角空格、Tab，不删除换行
+  function removeSpaces(text){
+    if(!text) return '';
+    return text.replace(/[ \t\u3000]/g, '');
+  }
+
+  // 六、序号添加：只给非空行加上"数字."序号（从1开始，无空格），空行原样保留、不参与编号
+  function addNumbering(text){
+    if(!text) return '';
+    const lines = text.split(/\r\n|\r|\n/);
+    let counter = 0;
+    const result = lines.map(line => {
+      const isBlank = line.replace(/[ \t\u3000]+/g, '').length === 0;
+      if(isBlank){
+        return line;
+      }
+      counter++;
+      return counter + '.' + line;
+    });
+    return result.join('\n');
+  }
+
+  // 七、序号移除：只移除行首"数字 + . + 可选一个空格"的序号
+  function removeNumbering(text){
+    if(!text) return '';
+    const lines = text.split(/\r\n|\r|\n/);
+    const result = lines.map(line => line.replace(/^\d+\.\s?/, ''));
+    return result.join('\n');
+  }
+
+  // ---------- Toast 提示（顶部居中，ERP风格） ----------
+  let toastTimer = null;
+  function showToast(msg){
+    toastText.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 1800);
+  }
+
+  // ---------- 统一的"处理并输出"封装：每个按钮独立运行，都基于输入框当前原文，互不联动 ----------
+  function runProcessor(processorFn, successMsg){
+    outputArea.value = processorFn(inputArea.value);
+    updateOutputStats();
+    showToast(successMsg);
+  }
+
+  // ---------- 按钮事件：所有处理函数均只在用户点击对应按钮时才执行，不做实时/自动转换 ----------
+  btnConvert.addEventListener('click', () => {
+    runProcessor(markdownToPlainText, '已转换为纯文本');
+  });
+
+  btnRemoveCR.addEventListener('click', () => {
+    runProcessor(removeCarriageReturns, '已去除回车');
+  });
+
+  btnMultiToSingle.addEventListener('click', () => {
+    runProcessor(multiLineToSingleLine, '已合并为一行');
+  });
+
+  btnDeleteLineBreaks.addEventListener('click', () => {
+    runProcessor(deleteLineBreaks, '已删除全部回车换行');
+  });
+
+  btnRemoveBlankLines.addEventListener('click', () => {
+    runProcessor(removeBlankLines, '已去除空行');
+  });
+
+  btnRemoveSpaces.addEventListener('click', () => {
+    runProcessor(removeSpaces, '已去除空格');
+  });
+
+  btnAddNumbering.addEventListener('click', () => {
+    runProcessor(addNumbering, '已添加序号');
+  });
+
+  btnRemoveNumbering.addEventListener('click', () => {
+    runProcessor(removeNumbering, '已移除序号');
+  });
+
+  btnPaste.addEventListener('click', async () => {
+    try{
+      // 优先尝试浏览器剪贴板API（部署到 HTTPS 网站后此方式可正常工作并一键粘贴）
+      const text = await navigator.clipboard.readText();
+      inputArea.value = text;
+      updateInputStats();
+      showToast('已粘贴到输入框');
+    }catch(err){
+      // file:// 本地文件场景下，浏览器出于安全限制不会授予剪贴板读取权限，
+      // 此时退回最可靠的方式：聚焦输入框并全选已有内容，方便用户按 Ctrl+V（Mac 为 Cmd+V）直接覆盖粘贴
+      inputArea.focus();
+      inputArea.select();
+      showToast('请按 Ctrl+V（Mac：Cmd+V）粘贴到输入框');
+    }
+  });
+
+  btnCopy.addEventListener('click', async () => {
+    if(!outputArea.value){
+      showToast('暂无可复制的内容');
+      return;
+    }
+    try{
+      await navigator.clipboard.writeText(outputArea.value);
+      showToast('已复制到剪贴板');
+    }catch(err){
+      outputArea.select();
+      document.execCommand('copy');
+      showToast('已复制到剪贴板');
+    }
+  });
+
+  btnClear.addEventListener('click', () => {
+    inputArea.value = '';
+    outputArea.value = '';
+    updateAllStats();
+    inputArea.focus();
+    showToast('已清空');
+  });
+
+  // 输入框内容变化时仅更新字数/字符统计，不触发任何处理逻辑（原文不自动处理）
+  inputArea.addEventListener('input', updateInputStats);
+
+  // 输出框支持二次编辑（增删改），编辑时实时更新输出区统计
+  outputArea.addEventListener('input', updateOutputStats);
+
+  updateAllStats();
+})();
+</script>
+
+</body>
+</html>
