@@ -22,7 +22,7 @@ theme = "PaperMod"
   [[menu.main]]
     identifier = "customized-tools"
     name = "定制化工具"
-    url = "/customized%20text%20processing%20tools/"
+    url = "/customizedtextprocessingtools/"
     weight = 35
   [[menu.main]]
     identifier = "daily-os"
