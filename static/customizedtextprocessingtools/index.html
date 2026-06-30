@@ -345,6 +345,7 @@
     <button class="tool-btn" id="btnClear">清空</button>
     <div class="toolbar-divider"></div>
     <button class="tool-btn action" id="btnConvert">MD转纯文本</button>
+    <button class="tool-btn action" id="btnConvertNoBlank">MD转纯文本且去除空行</button>
     <button class="tool-btn action" id="btnRemoveCR">去除回车</button>
     <button class="tool-btn action" id="btnMultiToSingle">多行换成一行</button>
     <button class="tool-btn action" id="btnDeleteLineBreaks">删除回车换行</button>
@@ -392,6 +393,7 @@
   const outputCharCount = document.getElementById('outputCharCount');
   const btnPaste = document.getElementById('btnPaste');
   const btnConvert = document.getElementById('btnConvert');
+  const btnConvertNoBlank = document.getElementById('btnConvertNoBlank');
   const btnCopy = document.getElementById('btnCopy');
   const btnClear = document.getElementById('btnClear');
   const btnRemoveCR = document.getElementById('btnRemoveCR');
@@ -670,6 +672,10 @@
   // ---------- 按钮事件：所有处理函数均只在用户点击对应按钮时才执行，不做实时/自动转换 ----------
   btnConvert.addEventListener('click', () => {
     runProcessor(markdownToPlainText, '已转换为纯文本');
+  });
+
+  btnConvertNoBlank.addEventListener('click', () => {
+    runProcessor(text => removeBlankLines(markdownToPlainText(text)), '已转换为纯文本并去除空行');
   });
 
   btnRemoveCR.addEventListener('click', () => {
