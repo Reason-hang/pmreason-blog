@@ -15,7 +15,7 @@
 
 | 工具 | 访问地址 | 说明 |
 |------|----------|------|
-| 定制化工具 | https://pmreason.top/customizedtextprocessingtools/ | 文本处理单页工具，第三版支持 MD 转纯文本时删除 emoji、MD 转纯文本并去除空行、中文逗号合并多行、右上角返回博客主页。 |
+| 定制化工具 | https://pmreason.top/customizedtextprocessingtools/ | 文本处理单页工具，第三版支持 MD 转纯文本时删除 emoji、MD 转纯文本并去除空行、中文逗号合并多行、标题降级、右上角返回博客主页。 |
 | 每日复盘工具 | https://pmreason.top/tools/daily-os/ | 本地存储的每日早晚复盘工具，支持历史记录和月度统计。 |
 
 ---

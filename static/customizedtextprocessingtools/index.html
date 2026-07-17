@@ -375,6 +375,7 @@
     <button class="tool-btn action" id="btnRemoveSpaces">去除空格</button>
     <button class="tool-btn action" id="btnAddNumbering">序号添加</button>
     <button class="tool-btn action" id="btnRemoveNumbering">序号移除</button>
+    <button class="tool-btn action" id="btnDemoteHeadings">标题降级</button>
   </div>
 
   <div class="columns">
@@ -426,6 +427,7 @@
   const btnRemoveSpaces = document.getElementById('btnRemoveSpaces');
   const btnAddNumbering = document.getElementById('btnAddNumbering');
   const btnRemoveNumbering = document.getElementById('btnRemoveNumbering');
+  const btnDemoteHeadings = document.getElementById('btnDemoteHeadings');
   const toast = document.getElementById('toast');
   const toastText = document.getElementById('toastText');
   const themeToggle = document.getElementById('themeToggle');
@@ -692,6 +694,34 @@
     return result.join('\n');
   }
 
+  // 九、标题降级：只处理 ATX 标题，跳过围栏代码块；H6 已是最高层级，保持不变
+  function demoteMarkdownHeadings(text){
+    if(!text) return '';
+    const lines = text.split(/\r\n|\r|\n/);
+    let inFence = false;
+    let fenceMarker = '';
+    const result = lines.map(line => {
+      const fence = line.match(/^[ \t]{0,3}(`{3,}|~{3,})/);
+      if(fence){
+        const marker = fence[1][0];
+        if(!inFence){
+          inFence = true;
+          fenceMarker = marker;
+        }else if(marker === fenceMarker){
+          inFence = false;
+          fenceMarker = '';
+        }
+        return line;
+      }
+      if(inFence) return line;
+      return line.replace(/^([ \t]{0,3})(#{1,6})(?=[ \t]|$)/, (match, indent, hashes) => {
+        if(hashes.length >= 6) return match;
+        return indent + '#'.repeat(hashes.length + 1) + match.slice(indent.length + hashes.length);
+      });
+    });
+    return result.join('\n');
+  }
+
   // ---------- Toast 提示（顶部居中，ERP风格） ----------
   let toastTimer = null;
   function showToast(msg){
@@ -749,6 +779,10 @@
 
   btnRemoveNumbering.addEventListener('click', () => {
     runProcessor(removeNumbering, '已移除序号');
+  });
+
+  btnDemoteHeadings.addEventListener('click', () => {
+    runProcessor(demoteMarkdownHeadings, '已完成标题降级');
   });
 
   btnPaste.addEventListener('click', async () => {
