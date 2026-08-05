@@ -646,12 +646,19 @@
     return nonEmptyLines.join(' ');
   }
 
-  // 三、多行换成一行（逗号）：每个非空行用中文逗号拼接
+  // 三、多行换成一行（逗号）：清理行边界标点，行间用中文逗号连接，末行用中文句号收尾
   function multiLineToCommaLine(text){
     if(!text) return '';
     const lines = text.split(/\r\n|\r|\n/);
     const nonEmptyLines = lines.map(line => line.trim()).filter(line => line.length > 0);
-    return nonEmptyLines.join('，');
+    const normalizedLines = nonEmptyLines.map(line => line
+      .replace(/^[，,。．.!！?？;；:：、]+/u, '')
+      .replace(/[，,。．.!！?？;；:：、]+$/u, '')
+      .trim()
+    );
+    const contentLines = normalizedLines.filter(line => line.length > 0);
+    if(!contentLines.length) return '';
+    return contentLines.slice(0, -1).map(line => line + '，').join('') + contentLines.at(-1) + '。';
   }
 
   // 四、删除回车换行：直接删掉所有换行符，不添加任何连接符
