@@ -9,6 +9,8 @@ tags:
 summary: "围绕海外仓 WMS 的系统定位、业务目标、入库、库存、出库、逆向和异常流程，整理 Phase 1 业务理解力层。"
 ---
 
+![Phase1 业务理解层 WMS系统项目](/images/wms/Phase1_业务理解层_WMS系统项目.jpg)
+
 > 本文件仅执行 `multi-lesson-system-project-playbook` 的 Phase 1：业务理解力层。
 > 已回顾：`Phase0内容盘点_WMS系统项目.md`。
 > 已读取：`references/L1-business.md`。
