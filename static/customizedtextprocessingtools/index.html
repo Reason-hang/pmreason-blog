@@ -8,41 +8,41 @@
   :root{
     --bg-page: #ffffff;
     --bg-panel: #ffffff;
-    --panel-border: #dde3dd;
-    --text-main: #1d241d;
-    --text-dim: #767f76;
-    --accent: #3A8C3F;
-    --accent-hover: #327536;
+    --panel-border: #e2e2e2;
+    --text-main: #1f1f1f;
+    --text-dim: #737373;
+    --accent: #FF4E00;
+    --accent-hover: #D94100;
     --accent-text: #ffffff;
-    --accent-soft: rgba(58,140,63,0.08);
-    --accent-soft-border: rgba(58,140,63,0.4);
+    --accent-soft: rgba(255,78,0,0.08);
+    --accent-soft-border: rgba(255,78,0,0.45);
     --btn-bg: #ffffff;
-    --btn-border: #d7dbd7;
-    --btn-hover-bg: #f1f5f1;
+    --btn-border: #d8d8d8;
+    --btn-hover-bg: #f5f5f5;
     --toast-bg: #ffffff;
-    --toast-text: #1d241d;
-    --toast-border: #dde3dd;
-    --divider-color: #dde3dd;
+    --toast-text: #1f1f1f;
+    --toast-border: #e2e2e2;
+    --divider-color: #e2e2e2;
   }
 
   [data-theme="dark"]{
-    --bg-page: #121512;
-    --bg-panel: #191d19;
-    --panel-border: #2d332d;
-    --text-main: #edf1ed;
-    --text-dim: #8d958d;
-    --accent: #3A8C3F;
-    --accent-hover: #46a04a;
+    --bg-page: #111111;
+    --bg-panel: #191919;
+    --panel-border: #303030;
+    --text-main: #f1f1f1;
+    --text-dim: #999999;
+    --accent: #FF4E00;
+    --accent-hover: #ff6a2a;
     --accent-text: #ffffff;
-    --accent-soft: rgba(58,140,63,0.2);
-    --accent-soft-border: rgba(70,160,74,0.5);
-    --btn-bg: #191d19;
-    --btn-border: #333a33;
-    --btn-hover-bg: #222822;
-    --toast-bg: #1f241f;
-    --toast-text: #edf1ed;
-    --toast-border: #333a33;
-    --divider-color: #2d332d;
+    --accent-soft: rgba(255,78,0,0.2);
+    --accent-soft-border: rgba(255,106,42,0.55);
+    --btn-bg: #191919;
+    --btn-border: #363636;
+    --btn-hover-bg: #242424;
+    --toast-bg: #202020;
+    --toast-text: #f1f1f1;
+    --toast-border: #363636;
+    --divider-color: #303030;
   }
 
   *{ box-sizing: border-box; }
@@ -184,7 +184,7 @@
     transform: scale(0.98);
   }
 
-  /* 处理类按钮：深绿色背景 + 白色文字 */
+  /* 处理类按钮：火焰橙背景 + 白色文字 */
   button.tool-btn.action{
     background: var(--accent);
     border-color: var(--accent);
@@ -628,14 +628,27 @@
     return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   }
 
-  // 删除 emoji / 绘文字 / 表情符号，覆盖常见图标、旗帜、变体选择符与零宽连接符组合
-  function removeEmoji(text){
+  // 删除正文中的 Unicode Emoji、词库内方括号表情和不可见字符。
+  // 未知方括号内容保留，避免误删 Markdown 链接、引用编号和业务字段。
+  const emoticonAliases = new Set([
+    'doge', '滑稽', '笑哭', '捂脸', '吃瓜', '旺柴', '裂开', '苦涩',
+    '酸了', '泪目', '破防', '流汗', '无语', '尴尬', '疑问', '震惊',
+    '惊讶', '害怕', '抓狂', '委屈', '可怜', '生气', '发怒', '难过',
+    '大哭', '快哭了', '偷笑', '坏笑', '阴险', '奸笑', '憨笑', '傲慢',
+    '白眼', '鄙视', '呲牙', '龇牙', '微笑', '撇嘴', '调皮', '得意',
+    '害羞', '亲亲', '闭嘴', '嘘', '酷', '晕', '衰', '骷髅', '吐',
+    '睡', '困', '哈欠', '悠闲', '奋斗', '加油', '鼓掌', '点赞',
+    '再见', '抱拳', '感谢', '擦汗', '抠鼻', '敲打', '思考', '赞'
+  ]);
+
+  function removeAllEmoticons(text){
     if(!text) return '';
     return text
-      .replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, '')
-      .replace(/[\u{1F100}-\u{1FAFF}\u{2600}-\u{27BF}]\uFE0F?/gu, '')
-      .replace(/\uFE0F/g, '')
-      .replace(/\u200D/g, '');
+      .replace(/(?:\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Emoji_Modifier_Base}|\p{Emoji_Modifier}|\uFE0F|\u20E3|\u200D)/gu, '')
+      .replace(/\[([^\]\r\n]{1,12})\]/gu, (match, label) => {
+        return emoticonAliases.has(label.toLowerCase()) ? '' : match;
+      })
+      .replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
   }
 
   // 二、多行换成一行：每行原文用空格拼接（不使用中文逗号）；连续换行（含空行）只生成一个空格
@@ -793,11 +806,11 @@
 
   // ---------- 按钮事件：所有处理函数均只在用户点击对应按钮时才执行，不做实时/自动转换 ----------
   btnConvert.addEventListener('click', () => {
-    runProcessor(text => removeEmoji(markdownToPlainText(text)), '已转换为纯文本并删除表情符号');
+    runProcessor(text => removeAllEmoticons(markdownToPlainText(text)), '已转换为纯文本并删除表情符号');
   });
 
   btnConvertNoBlank.addEventListener('click', () => {
-    runProcessor(text => removeBlankLines(removeEmoji(markdownToPlainText(text))), '已转换为纯文本、删除表情符号并去除空行');
+    runProcessor(text => removeBlankLines(removeAllEmoticons(markdownToPlainText(text))), '已转换为纯文本、删除表情符号并去除空行');
   });
 
   btnRemoveCR.addEventListener('click', () => {
