@@ -379,6 +379,7 @@
     <button class="tool-btn action" id="btnPromoteHeadings">标题升级</button>
     <button class="tool-btn action" id="btnRemoveLineTabs">去除所有tab键</button>
     <button class="tool-btn action" id="btnRemoveSpeakerTimestamps">去除发言人时间戳</button>
+    <button class="tool-btn action" id="btnToMarkdownTable">转MD语法表格</button>
   </div>
 
   <div class="columns">
@@ -425,6 +426,7 @@
   const btnRemoveCR = document.getElementById('btnRemoveCR');
   const btnMultiToSingle = document.getElementById('btnMultiToSingle');
   const btnMultiToComma = document.getElementById('btnMultiToComma');
+  const btnToMarkdownTable = document.getElementById('btnToMarkdownTable');
   const btnDeleteLineBreaks = document.getElementById('btnDeleteLineBreaks');
   const btnRemoveBlankLines = document.getElementById('btnRemoveBlankLines');
   const btnRemoveSpaces = document.getElementById('btnRemoveSpaces');
@@ -682,7 +684,34 @@
     }).join('');
   }
 
-  // 四、去除回车换行：直接删掉所有换行符，不添加任何连接符
+  // 四、转 Markdown 语法表格：首行作为表头，默认按 Tab 分列，空行忽略
+  function toMarkdownTable(text){
+    if(!text) return '';
+    const lines = text.split(/\r\n|\r|\n/).map(line => line.trim()).filter(line => line.length > 0);
+    if(!lines.length) return '';
+
+    const rows = lines.map(line => {
+      if(line.startsWith('|') && line.endsWith('|')){
+        return line.slice(1, -1).split('|').map(cell => cell.trim());
+      }
+      return line.split('\t').map(cell => cell.trim());
+    });
+
+    // 已经带 Markdown 分隔线时，先去掉旧分隔线再统一生成，避免重复。
+    if(rows.length > 1 && rows[1].every(cell => /^:?-{3,}:?$/.test(cell))){
+      rows.splice(1, 1);
+    }
+
+    const columnCount = Math.max(...rows.map(row => row.length));
+    const normalizedRows = rows.map(row => Array.from({length: columnCount}, (_, index) => {
+      return (row[index] || '').replace(/\|/g, '\\\|').trim();
+    }));
+    const formatRow = row => '| ' + row.join(' | ') + ' |';
+    const separator = Array.from({length: columnCount}, () => '---');
+    return [formatRow(normalizedRows[0]), formatRow(separator), ...normalizedRows.slice(1).map(formatRow)].join('\n');
+  }
+
+  // 五、去除回车换行：直接删掉所有换行符，不添加任何连接符
   function deleteLineBreaks(text){
     if(!text) return '';
     return text.replace(/\r\n|\r|\n/g, '');
@@ -833,6 +862,10 @@
 
   btnMultiToComma.addEventListener('click', () => {
     runProcessor(multiLineToCommaLine, '已用中文逗号合并为一行');
+  });
+
+  btnToMarkdownTable.addEventListener('click', () => {
+    runProcessor(toMarkdownTable, '已转换为 Markdown 语法表格');
   });
 
   btnDeleteLineBreaks.addEventListener('click', () => {
