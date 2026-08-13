@@ -370,14 +370,15 @@
     <button class="tool-btn action" id="btnRemoveCR">去除回车</button>
     <button class="tool-btn action" id="btnMultiToSingle">多行换成一行</button>
     <button class="tool-btn action" id="btnMultiToComma">多行换成一行（逗号）</button>
-    <button class="tool-btn action" id="btnDeleteLineBreaks">删除回车换行</button>
+    <button class="tool-btn action" id="btnDeleteLineBreaks">去除回车换行</button>
     <button class="tool-btn action" id="btnRemoveBlankLines">去除空行</button>
     <button class="tool-btn action" id="btnRemoveSpaces">去除空格</button>
     <button class="tool-btn action" id="btnAddNumbering">序号添加</button>
     <button class="tool-btn action" id="btnRemoveNumbering">序号移除</button>
     <button class="tool-btn action" id="btnDemoteHeadings">标题降级</button>
     <button class="tool-btn action" id="btnPromoteHeadings">标题升级</button>
-    <button class="tool-btn action" id="btnRemoveLineTabs">去掉所有tab键</button>
+    <button class="tool-btn action" id="btnRemoveLineTabs">去除所有tab键</button>
+    <button class="tool-btn action" id="btnRemoveSpeakerTimestamps">去除发言人时间戳</button>
   </div>
 
   <div class="columns">
@@ -432,6 +433,7 @@
   const btnDemoteHeadings = document.getElementById('btnDemoteHeadings');
   const btnPromoteHeadings = document.getElementById('btnPromoteHeadings');
   const btnRemoveLineTabs = document.getElementById('btnRemoveLineTabs');
+  const btnRemoveSpeakerTimestamps = document.getElementById('btnRemoveSpeakerTimestamps');
   const toast = document.getElementById('toast');
   const toastText = document.getElementById('toastText');
   const themeToggle = document.getElementById('themeToggle');
@@ -680,7 +682,7 @@
     }).join('');
   }
 
-  // 四、删除回车换行：直接删掉所有换行符，不添加任何连接符
+  // 四、去除回车换行：直接删掉所有换行符，不添加任何连接符
   function deleteLineBreaks(text){
     if(!text) return '';
     return text.replace(/\r\n|\r|\n/g, '');
@@ -780,10 +782,18 @@
     return result.join('\n');
   }
 
-  // 十一、去掉每行开头的所有 Tab，保留行内 Tab 和其他正文内容
+  // 十一、去除每行开头的所有 Tab，保留行内 Tab 和其他正文内容
   function removeLineStartTabs(text){
     if(!text) return '';
     return text.replace(/(^|\r\n|\r|\n)\t+/g, '$1');
+  }
+
+  // 十二、去除发言人时间戳：只删除独占一行的“发言人/Speaker + HH:MM[:SS]”标记
+  function removeSpeakerTimestamps(text){
+    if(!text) return '';
+    const lines = text.split(/\r\n|\r|\n/);
+    const speakerTimestampPattern = /^\s*(?:发言人|speaker)\s*[:：]?\s*\d{1,2}:\d{2}(?::\d{2})?\s*$/iu;
+    return lines.filter(line => !speakerTimestampPattern.test(line)).join('\n');
   }
 
   // ---------- Toast 提示（顶部居中，ERP风格） ----------
@@ -826,7 +836,7 @@
   });
 
   btnDeleteLineBreaks.addEventListener('click', () => {
-    runProcessor(deleteLineBreaks, '已删除全部回车换行');
+    runProcessor(deleteLineBreaks, '已去除全部回车换行');
   });
 
   btnRemoveBlankLines.addEventListener('click', () => {
@@ -854,7 +864,11 @@
   });
 
   btnRemoveLineTabs.addEventListener('click', () => {
-    runProcessor(removeLineStartTabs, '已去掉每行开头的 Tab 键');
+    runProcessor(removeLineStartTabs, '已去除每行开头的 Tab 键');
+  });
+
+  btnRemoveSpeakerTimestamps.addEventListener('click', () => {
+    runProcessor(removeSpeakerTimestamps, '已去除发言人时间戳');
   });
 
   btnPaste.addEventListener('click', async () => {
