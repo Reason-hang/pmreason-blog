@@ -901,7 +901,7 @@
   });
 
   btnRemoveSpeakerTimestamps.addEventListener('click', () => {
-    runProcessor(removeSpeakerTimestamps, '已去除发言人时间戳');
+    runProcessor(text => removeBlankLines(removeSpeakerTimestamps(text)), '已去除发言人时间戳和空行');
   });
 
   btnPaste.addEventListener('click', async () => {
