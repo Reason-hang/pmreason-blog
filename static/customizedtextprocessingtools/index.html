@@ -380,6 +380,7 @@
     <button class="tool-btn action" id="btnRemoveLineTabs">去除所有tab键</button>
     <button class="tool-btn action" id="btnRemoveSpeakerTimestamps">去除发言人时间戳</button>
     <button class="tool-btn action" id="btnToMarkdownTable">转MD语法表格</button>
+    <button class="tool-btn action" id="btnAddMarkTags">每行加&lt;mark&gt;标签</button>
   </div>
 
   <div class="columns">
@@ -436,6 +437,7 @@
   const btnPromoteHeadings = document.getElementById('btnPromoteHeadings');
   const btnRemoveLineTabs = document.getElementById('btnRemoveLineTabs');
   const btnRemoveSpeakerTimestamps = document.getElementById('btnRemoveSpeakerTimestamps');
+  const btnAddMarkTags = document.getElementById('btnAddMarkTags');
   const toast = document.getElementById('toast');
   const toastText = document.getElementById('toastText');
   const themeToggle = document.getElementById('themeToggle');
@@ -825,6 +827,18 @@
     return lines.filter(line => !speakerTimestampPattern.test(line)).join('\n');
   }
 
+  // 十三、每行加 mark 标签：保留空行，并避免对已有完整标签的行重复包裹
+  function addMarkTags(text){
+    if(!text) return '';
+    const lines = text.split(/\r\n|\r|\n/);
+    const completeMarkLinePattern = /^\s*<mark\b[^>]*>[\s\S]*<\/mark>\s*$/iu;
+    return lines.map(line => {
+      if(line.replace(/[ \t\u3000]+/g, '').length === 0) return line;
+      if(completeMarkLinePattern.test(line)) return line;
+      return `<mark>${line}</mark>`;
+    }).join('\n');
+  }
+
   // ---------- Toast 提示（顶部居中，ERP风格） ----------
   let toastTimer = null;
   function showToast(msg){
@@ -902,6 +916,10 @@
 
   btnRemoveSpeakerTimestamps.addEventListener('click', () => {
     runProcessor(text => removeBlankLines(removeSpeakerTimestamps(text)), '已去除发言人时间戳和空行');
+  });
+
+  btnAddMarkTags.addEventListener('click', () => {
+    runProcessor(addMarkTags, '已为每个非空行添加 <mark> 标签');
   });
 
   btnPaste.addEventListener('click', async () => {
