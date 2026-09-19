@@ -827,15 +827,15 @@
     return lines.filter(line => !speakerTimestampPattern.test(line)).join('\n');
   }
 
-  // 十三、批量加 mark 标签：保留 Markdown 无序列表前缀、空行，并避免重复包裹
+  // 十三、批量加 mark 标签：保留 Markdown 列表前缀、空行，并避免重复包裹
   function addMarkTags(text){
     if(!text) return '';
     const lines = text.split(/\r\n|\r|\n/);
     const completeMarkContentPattern = /^\s*<mark\b[^>]*>[\s\S]*<\/mark>\s*$/iu;
-    const unorderedListPattern = /^(\s*[-*+]\s+)([\s\S]*)$/u;
+    const listPattern = /^(\s*(?:[-*+]|\d+[.)])\s+)([\s\S]*)$/u;
     return lines.map(line => {
       if(line.replace(/[ \t\u3000]+/g, '').length === 0) return line;
-      const listMatch = line.match(unorderedListPattern);
+      const listMatch = line.match(listPattern);
       const prefix = listMatch ? listMatch[1] : '';
       const content = listMatch ? listMatch[2] : line;
       if(completeMarkContentPattern.test(content)) return line;
